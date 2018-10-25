@@ -1,0 +1,40 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "ethereum-chart.fullname" . }}
+  labels:
+    app: {{ include "ethereum-chart.name" . }}
+    chart: {{ include "ethereum-chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "ethereum-chart.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ethereum-chart.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ['/bin/sh', '-c', 'geth --testnet --datadir /opt/geth --rpc --rpcapi=web3,eth,personal,miner,net,txpool,debug --rpccorsdomain "*" --rpcaddr "0.0.0.0" --rpcport "8545" --nat "any" --gcmode=archive --rpcvhosts="*" --ws --wsaddr "0.0.0.0" --wsorigins "*"']
+        ports:
+        - name: rpc
+          containerPort: {{ .Values.service.rpcInternalPort }}
+        - name: ws
+          containerPort: {{ .Values.service.wsInternalPort }}
+        - name: p2p
+          containerPort: {{ .Values.service.p2pInternalPort }}
+        volumeMounts:
+          - name: geth-pv-storage
+            mountPath: "/opt/geth"
+      volumes:
+      - name: geth-pv-storage
+        persistentVolumeClaim:
+          claimName: geth-pv-claim

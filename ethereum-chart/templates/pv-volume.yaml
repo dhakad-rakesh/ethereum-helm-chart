@@ -1,0 +1,17 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: geth-pv-volume
+  labels:
+    app: geth
+spec:
+  storageClassName: faster
+  capacity:
+    storage: 150Gi
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: {{ .Values.data.gcePersistentDiskName }}
+    fsType: ext4
+
+

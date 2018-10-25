@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ethereum-chart.fullname" . }}
+  labels:
+    app: {{ include "ethereum-chart.name" . }}
+    chart: {{ include "ethereum-chart.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  ports:
+  - name: rpc
+    port: {{ .Values.service.rpcExternalPort }}
+    targetPort: {{ .Values.service.rpcInternalPort }}
+  - name: ws
+    port: {{ .Values.service.wsExternalPort }}
+    targetPort: {{ .Values.service.wsInternalPort }}
+  - name: p2p
+    port: {{ .Values.service.p2pExternalPort }}
+    targetPort: {{ .Values.service.p2pInternalPort }}
+  selector:
+    app: {{ include "ethereum-chart.name" . }}
+    release: {{ .Release.Name }}
